@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minidb"
+version = "1.0.0"
+description = "A small but real SQL database engine: B+ tree storage, WAL, transactions, joins, aggregates. Zero dependencies."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Luv Goel" }]
+keywords = ["database", "sql", "b-tree", "wal", "storage-engine", "parser"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Database :: Database Engines/Servers",
+]
+
+[project.urls]
+Homepage = "https://github.com/Luv-Goel/minidb"
+
+[project.scripts]
+minidb = "minidb.repl:main"
+
+[tool.setuptools.packages.find]
+include = ["minidb*"]
