@@ -1,0 +1,10 @@
+site_name: minidb
+site_description: A small but real SQL database engine in Python.
+theme:
+  name: material
+  palette:
+    primary: blue
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - SQL Reference: sql.md

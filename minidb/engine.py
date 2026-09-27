@@ -185,6 +185,10 @@ class Database:
 
     def execute(self, sql: str) -> Result:
         stmt = parse(sql)
+        if isinstance(stmt, ast.Explain):
+            import pprint
+            plan = pprint.pformat(stmt.stmt)
+            return Result(["plan"], [(line,) for line in plan.splitlines()], len(plan.splitlines()), "explain")
         if isinstance(stmt, ast.Select):
             return self._select(stmt)
         if isinstance(stmt, ast.Insert):
@@ -624,4 +628,19 @@ def _scalar_fn(name: str, args: list) -> Any:
         return abs(args[0]) if args[0] is not None else None
     if name == "coalesce":
         return next((a for a in args if a is not None), None)
+    if name == "round":
+        if args[0] is None: return None
+        ndigits = int(args[1]) if len(args) > 1 and args[1] is not None else 0
+        return round(float(args[0]), ndigits)
+    if name == "trim":
+        return str(args[0]).strip() if args[0] is not None else None
+    if name == "ltrim":
+        return str(args[0]).lstrip() if args[0] is not None else None
+    if name == "rtrim":
+        return str(args[0]).rstrip() if args[0] is not None else None
+    if name == "concat":
+        return "".join(str(a) for a in args if a is not None)
+    import random
+    if name == "random":
+        return random.randint(-9223372036854775808, 9223372036854775807)
     raise ExecutionError(f"unknown function {name!r}")

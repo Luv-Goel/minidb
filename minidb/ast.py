@@ -177,6 +177,11 @@ class Rollback(Statement):
     pass
 
 
+@dataclass
+class Explain(Statement):
+    stmt: Statement
+
+
 # --------------------------------------------------------------------- #
 # rendering (for output column labels)
 # --------------------------------------------------------------------- #

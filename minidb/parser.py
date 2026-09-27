@@ -100,6 +100,9 @@ class Parser:
         elif kw == "rollback":
             self.advance()
             stmt = ast.Rollback()
+        elif kw == "explain":
+            self.advance()
+            stmt = ast.Explain(self.parse_statement())
         else:
             raise ParseError(f"unsupported statement {tok.text!r}", tok.pos)
         # optional trailing semicolon(s)
