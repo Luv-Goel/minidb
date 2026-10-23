@@ -1,0 +1,1014 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A small but real SQL database engine in Python.">
+      
+      
+      
+      
+      
+        <link rel="next" href="architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>minidb</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#minidb" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="minidb" class="md-header__button md-logo" aria-label="minidb" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            minidb
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="minidb" class="md-nav__button md-logo" aria-label="minidb" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    minidb
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📖 Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ Architecture &amp; Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Architecture &amp; Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components overview:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Feature Matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏁 Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏁 Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interactive-shell-repl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💻 Interactive Shell (REPL)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Interactive Shell (REPL)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-as-a-python-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Using as a Python Library
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧠 Deep Dive: How it Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧠 Deep Dive: How it Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commit-path-durability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commit Path (Durability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crash-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crash Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-tree-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B+ Tree Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛠️ Development &amp; Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📄 License
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📖 Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ Architecture &amp; Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ Architecture &amp; Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Components overview:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feature-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Feature Matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏁 Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏁 Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interactive-shell-repl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💻 Interactive Shell (REPL)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Interactive Shell (REPL)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-as-a-python-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Using as a Python Library
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deep-dive-how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧠 Deep Dive: How it Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧠 Deep Dive: How it Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commit-path-durability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commit Path (Durability)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crash-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crash Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-tree-internals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B+ Tree Internals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛠️ Development &amp; Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📄 License
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="minidb">minidb</h1>
+<blockquote>
+<p>A lightweight, educational, yet fully functional SQL database engine written entirely in pure Python.
+Featuring a B+ tree storage layer, Write-Ahead Logging (WAL) for durability, ACID transactions, and a custom recursive-descent SQL parser—with <strong>zero third-party dependencies</strong>.</p>
+</blockquote>
+<p><a href="https://github.com/Luv-Goel/minidb/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Luv-Goel/minidb/actions/workflows/ci.yml/badge.svg" /></a>
+<a href="https://Luv-Goel.github.io/minidb/"><img alt="Docs" src="https://img.shields.io/badge/docs-GitHub_Pages-blue" /></a>
+<img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-blue" />
+<img alt="Dependencies" src="https://img.shields.io/badge/dependencies-zero-brightgreen" />
+<img alt="License" src="https://img.shields.io/badge/license-MIT-green" /></p>
+<p><code>minidb</code> is not a wrapper around SQLite or any other existing engine. The entire database stack—from the lexical analysis of SQL queries to the physical persistence of bytes on a disk—is built from scratch in this repository. It spans roughly two thousand lines of highly readable, extensively tested Python code, making it a perfect reference for understanding how relational databases work under the hood.</p>
+<hr />
+<h2 id="table-of-contents">📖 Table of Contents</h2>
+<ul>
+<li><a href="#architecture--design">Architecture &amp; Design</a></li>
+<li><a href="#feature-matrix">Feature Matrix</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#interactive-shell-repl">Interactive Shell (REPL)</a></li>
+<li><a href="#using-as-a-python-library">Using as a Python Library</a></li>
+<li><a href="#deep-dive-how-it-works">Deep Dive: How it Works</a></li>
+<li><a href="#development--testing">Development &amp; Testing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<hr />
+<h2 id="architecture-design">🏗️ Architecture &amp; Design</h2>
+<p>The engine is decoupled into clear, modular layers that mirror industrial-grade relational database management systems (RDBMS).</p>
+<pre><code class="language-mermaid">flowchart TD
+    subgraph Frontend
+        SQL(SQL Query) --&gt; Lexer
+        Lexer --&gt; Parser
+        Parser --&gt; AST
+    end
+
+    subgraph Execution
+        AST --&gt; PlannerExecutor
+    end
+
+    subgraph Storage Engine
+        PlannerExecutor --&gt; BTree(B+ Tree Indexes)
+        PlannerExecutor --&gt; Tx(Transactions &amp; In-Memory Undo)
+
+        BTree --&gt; Pager(Buffer Pool / Pager)
+        Tx --&gt; WAL(Write-Ahead Log / Redo)
+
+        Pager --&gt; Disk[(Data File .db)]
+        WAL --&gt; Disk
+    end
+</code></pre>
+<h3 id="components-overview">Components overview:</h3>
+<ol>
+<li><strong>Frontend (Lexer &amp; Parser):</strong> A hand-written recursive descent parser converts SQL strings into strongly typed Abstract Syntax Trees (AST).</li>
+<li><strong>Execution Engine:</strong> Evaluates AST nodes, pushing down selections (where clauses) to reduce memory overhead and performing streaming aggregations and joins.</li>
+<li><strong>Storage (B+ Tree &amp; Pager):</strong> Data is organized into 4 KiB pages and stored in a B+ Tree, caching active pages in an LRU buffer pool.</li>
+<li><strong>Durability (WAL):</strong> Employs Write-Ahead Logging to guarantee atomicity and durability (fsync-on-commit), allowing full replay and crash recovery.</li>
+</ol>
+<hr />
+<h2 id="feature-matrix">🚀 Feature Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Subsystem</th>
+<th>Capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Storage &amp; Buffer</strong></td>
+<td>4 KiB paged data file, LRU buffer pool (stealing dirty pages), dynamic free-page list recycling.</td>
+</tr>
+<tr>
+<td><strong>Indexing</strong></td>
+<td>B+ tree per table (rowid-keyed) with internal splits, linked leaves, and lazy deletes (stale separators act as routing hints).</td>
+</tr>
+<tr>
+<td><strong>Durability (ACID)</strong></td>
+<td>Redo-only WAL, strictly enforced <code>fsync</code>-on-commit, checkpointing, and <strong>simulated crash recovery replay</strong>.</td>
+</tr>
+<tr>
+<td><strong>Transactions</strong></td>
+<td>Explicit <code>BEGIN</code>, <code>COMMIT</code>, and <code>ROLLBACK</code> commands backed by in-memory undo buffers.</td>
+</tr>
+<tr>
+<td><strong>DDL (Schema)</strong></td>
+<td><code>CREATE TABLE</code> and <code>DROP TABLE</code> (with <code>IF [NOT] EXISTS</code>), schema persistence, and strongly typed columns (<code>INTEGER</code>, <code>TEXT</code>).</td>
+</tr>
+<tr>
+<td><strong>DML (Data)</strong></td>
+<td>Multi-row <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code> execution with arbitrary <code>WHERE</code> conditions.</td>
+</tr>
+<tr>
+<td><strong>Queries (DQL)</strong></td>
+<td><code>JOIN ... ON</code>, <code>WHERE</code> (AND/OR/NOT, <code>IN</code>, <code>BETWEEN</code>, <code>LIKE</code>, <code>IS NULL</code>), <code>GROUP BY</code> + <code>HAVING</code>, <code>ORDER BY</code>, <code>LIMIT</code>/<code>OFFSET</code>, <code>DISTINCT</code>, and aliases.</td>
+</tr>
+<tr>
+<td><strong>Aggregates</strong></td>
+<td>Built-in streaming aggregates: <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>.</td>
+</tr>
+<tr>
+<td><strong>Scalar Functions</strong></td>
+<td><code>upper</code>, <code>lower</code>, <code>length</code>, <code>abs</code>, <code>coalesce</code>, <code>round</code>, <code>trim</code>, <code>ltrim</code>, <code>rtrim</code>, <code>concat</code>, <code>random</code>.</td>
+</tr>
+<tr>
+<td><strong>Introspection</strong></td>
+<td>Prepend <code>EXPLAIN</code> to any query to view its parsed execution plan tree.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="getting-started">🏁 Getting Started</h2>
+<p>Because <code>minidb</code> has zero dependencies, getting it running takes seconds.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li>Python 3.10 or higher.</li>
+</ul>
+<h3 id="installation">Installation</h3>
+<pre><code class="language-bash">git clone git@github.com:Luv-Goel/minidb.git
+cd minidb
+</code></pre>
+<hr />
+<h2 id="interactive-shell-repl">💻 Interactive Shell (REPL)</h2>
+<p>The repository comes with a built-in interactive shell, similar to the <code>sqlite3</code> or <code>psql</code> command-line interfaces.</p>
+<pre><code class="language-bash"># Launch the shell against a new or existing database file
+python -m minidb.repl demo.db
+</code></pre>
+<h3 id="example-session">Example Session</h3>
+<pre><code class="language-sql">minidb&gt; CREATE TABLE users (id INTEGER, name TEXT, age INTEGER);
+ok, 0 row(s)
+
+minidb&gt; INSERT INTO users VALUES (1, 'ada', 36), (2, 'grace', 85);
+ok, 2 row(s)
+
+minidb&gt; SELECT name, round(age / 10.0, 1) as decade FROM users WHERE age &gt;= 50;
+name  | decade
+------+-------
+grace | 8.5
+1 row(s)
+
+minidb&gt; EXPLAIN SELECT * FROM users;
+plan
+--------------------------------------
+Select(columns=[SelectItem(expr=Column(name='*', table=None), alias=None)],
+       from_table=TableRef(name='users', alias=None),
+       ...)
+</code></pre>
+<p>You can also run the scripted tour to see joins and aggregations in action:</p>
+<pre><code class="language-bash">python examples/demo.py
+</code></pre>
+<hr />
+<h2 id="using-as-a-python-library">📦 Using as a Python Library</h2>
+<p>You can import and use <code>minidb</code> directly in your Python applications using the context manager API.</p>
+<pre><code class="language-python">from minidb import Database
+
+with Database(&quot;shop.db&quot;) as db:
+    # 1. Create a table
+    db.execute(&quot;CREATE TABLE items (sku INTEGER, label TEXT, cents INTEGER)&quot;)
+    db.execute(&quot;INSERT INTO items VALUES (1, 'espresso', 350)&quot;)
+
+    # 2. Transaction controls
+    db.execute(&quot;BEGIN&quot;)
+    db.execute(&quot;UPDATE items SET cents = cents + 50 WHERE sku = 1&quot;)
+    db.execute(&quot;ROLLBACK&quot;) # The update is safely discarded
+
+    # 3. Querying data
+    result = db.execute(&quot;SELECT label FROM items WHERE cents &lt; 400&quot;)
+
+    for row in result:
+        print(row) # Output: ('espresso',)
+</code></pre>
+<hr />
+<h2 id="deep-dive-how-it-works">🧠 Deep Dive: How it Works</h2>
+<h3 id="commit-path-durability">Commit Path (Durability)</h3>
+<p>When a transaction commits, <code>minidb</code> appends redo records to the Write-Ahead Log (WAL) and issues an <code>fsync</code> to guarantee the bytes are physically written to the storage drive. Only then are the dirty pages flushed from the buffer pool to the actual <code>.db</code> file, and finally, the WAL is truncated. </p>
+<h3 id="crash-recovery">Crash Recovery</h3>
+<p>On database startup, <code>minidb</code> checks the WAL. If it contains data, it means the database was improperly shut down (e.g., power loss). The engine replays the committed transactions identically, safely reapplying them to the data file. The records carry absolute "after-images", making the replay completely idempotent.</p>
+<h3 id="b-tree-internals">B+ Tree Internals</h3>
+<p>The B+ tree enforces lazy deletion. Rather than eagerly rebalancing the tree when rows are removed (which is expensive), stale separators are left behind to act as routing hints. This is the exact same architectural trade-off made by production engines like InnoDB.</p>
+<hr />
+<h2 id="development-testing">🛠️ Development &amp; Testing</h2>
+<p>The test suite contains 48 rigorous tests covering parsing, semantic queries, B+ tree manipulation, and most notably, <strong>simulated power-loss recovery</strong>. </p>
+<p>To run the unit tests:</p>
+<pre><code class="language-bash">python -m unittest discover -s tests -v
+</code></pre>
+<p>During crash recovery tests, the process state is intentionally wiped, dirty pages are discarded, and the WAL is the only surviving state used to resurrect the database.</p>
+<p>See <a href="CONTRIBUTING.md">CONTRIBUTING.md</a> for more details on submitting PRs.</p>
+<hr />
+<h2 id="license">📄 License</h2>
+<p>This project is licensed under the MIT License - see the <a href="LICENSE">LICENSE</a> file for details.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": [], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
