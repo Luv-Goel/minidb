@@ -133,3 +133,47 @@ def test_distinct_orderby_hidden_column_is_deterministic(db):
     second = db.execute("SELECT DISTINCT a FROM t ORDER BY b").rows
     assert first == second                       # deterministic
     assert sorted(r[0] for r in first) == [1, 5, 9]   # DISTINCT preserved
+
+# --------------------------------------------------------------------- #
+# 6. Parameterized queries (? placeholders)
+# --------------------------------------------------------------------- #
+
+def test_parameterized_select_binds_positionally(db):
+    db.execute("CREATE TABLE t (a INTEGER, b TEXT)")
+    db.execute("INSERT INTO t VALUES (1, 'one'), (2, 'two'), (3, 'one')")
+    assert db.execute("SELECT a FROM t WHERE b = ?", ("one",)).rows == [(1,), (3,)]
+    assert db.execute("SELECT b FROM t WHERE a > ?", (1,)).rows == [('two',), ('one',)]
+
+def test_parameterized_insert(db):
+    db.execute("CREATE TABLE t (a INTEGER, b TEXT)")
+    db.execute("INSERT INTO t VALUES (?, ?)", (42, 'meaning'))
+    assert db.execute("SELECT * FROM t").rows == [(42, 'meaning')]
+
+def test_parameterized_update(db):
+    db.execute("CREATE TABLE t (a INTEGER, b TEXT)")
+    db.execute("INSERT INTO t VALUES (1, 'old')")
+    db.execute("UPDATE t SET b = ? WHERE a = ?", ('new', 1))
+    assert db.execute("SELECT b FROM t WHERE a = 1").rows == [('new',)]
+
+def test_parameterized_delete(db):
+    db.execute("CREATE TABLE t (a INTEGER)")
+    db.execute("INSERT INTO t VALUES (1), (2), (3)")
+    db.execute("DELETE FROM t WHERE a = ?", (2,))
+    assert db.execute("SELECT a FROM t ORDER BY a").rows == [(1,), (3,)]
+
+def test_parameterized_count(db):
+    db.execute("CREATE TABLE t (a INTEGER)")
+    db.execute("INSERT INTO t VALUES (1), (2), (3), (3)")
+    assert db.execute("SELECT COUNT(*) FROM t WHERE a = ?", (3,)).rows == [(2,)]
+
+def test_missing_params_raises(db):
+    db.execute("CREATE TABLE t (a INTEGER)")
+    db.execute("INSERT INTO t VALUES (1)")
+    with pytest.raises(ExecutionError, match="none were supplied"):
+        db.execute("SELECT * FROM t WHERE a = ?")
+
+def test_too_few_params_raises(db):
+    db.execute("CREATE TABLE t (a INTEGER, b INTEGER)")
+    db.execute("INSERT INTO t VALUES (1, 2)")
+    with pytest.raises(ExecutionError, match="not enough parameters"):
+        db.execute("SELECT * FROM t WHERE a = ? AND b = ?", (1,))

@@ -82,6 +82,10 @@ class FuncCall(Expr):
     args: list[Expr]
     distinct: bool = False          # COUNT(DISTINCT x) / etc.
 
+@dataclass
+class ParamPlaceholder(Expr):
+    index: int                      # positional position of the `?` in the SQL
+
 
 AGGREGATES = {"count", "sum", "avg", "min", "max"}
 

@@ -16,7 +16,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Sequence
 
 from . import ast
 from .bplustree import BPlusTree
@@ -183,8 +183,9 @@ class Database:
     # statement dispatch
     # ------------------------------------------------------------------ #
 
-    def execute(self, sql: str) -> Result:
+    def execute(self, sql: str, params: Optional[Sequence[Any]] = None) -> Result:
         stmt = parse(sql)
+        stmt = self._bind_params(stmt, params)
         if isinstance(stmt, ast.Explain):
             import pprint
             plan = pprint.pformat(stmt.stmt)
@@ -602,6 +603,89 @@ class Database:
         return value is not None and value is not False and value != 0 \
             and value != ""
 
+    # ------------------------------------------------------------------ #
+    # parameter binding (? placeholders)
+    # ------------------------------------------------------------------ #
+
+    def _bind_params(self, stmt, params):
+        """Replace every `?` placeholder with a Literal bound positionally
+        from params. Raises ExecutionError on missing/too-few parameters."""
+        idx = [0]
+        return self._bind(stmt, params, idx)
+
+    def _bind(self, node, params, idx):
+        if isinstance(node, ast.ParamPlaceholder):
+            if params is None:
+                raise ExecutionError("statement uses ? parameters but none were supplied")
+            if idx[0] >= len(params):
+                raise ExecutionError(
+                    f"not enough parameters for statement (need at least {idx[0] + 1})"
+                )
+            val = params[idx[0]]
+            idx[0] += 1
+            return ast.Literal(val)
+        if isinstance(node, (ast.Literal, ast.Column)):
+            return node
+        if isinstance(node, ast.BinOp):
+            return ast.BinOp(node.op, self._bind(node.left, params, idx),
+                             self._bind(node.right, params, idx))
+        if isinstance(node, ast.And):
+            return ast.And(self._bind(node.left, params, idx),
+                           self._bind(node.right, params, idx))
+        if isinstance(node, ast.Or):
+            return ast.Or(self._bind(node.left, params, idx),
+                          self._bind(node.right, params, idx))
+        if isinstance(node, ast.Not):
+            return ast.Not(self._bind(node.operand, params, idx))
+        if isinstance(node, ast.IsNull):
+            return ast.IsNull(self._bind(node.operand, params, idx), node.negated)
+        if isinstance(node, ast.Like):
+            return ast.Like(self._bind(node.operand, params, idx),
+                            self._bind(node.pattern, params, idx), node.negated)
+        if isinstance(node, ast.In):
+            return ast.In(self._bind(node.operand, params, idx),
+                          [self._bind(o, params, idx) for o in node.options],
+                          node.negated)
+        if isinstance(node, ast.Between):
+            return ast.Between(self._bind(node.operand, params, idx),
+                               self._bind(node.low, params, idx),
+                               self._bind(node.high, params, idx), node.negated)
+        if isinstance(node, ast.FuncCall):
+            return ast.FuncCall(node.name,
+                                [self._bind(a, params, idx) for a in node.args],
+                                node.distinct)
+        if isinstance(node, ast.SelectItem):
+            return ast.SelectItem(self._bind(node.expr, params, idx), node.alias)
+        if isinstance(node, ast.TableRef):
+            return node
+        if isinstance(node, ast.Join):
+            return ast.Join(node.table, self._bind(node.on, params, idx))
+        if isinstance(node, ast.Select):
+            return ast.Select(
+                [self._bind(it, params, idx) for it in node.columns],
+                node.from_table,
+                [self._bind(j, params, idx) for j in node.joins],
+                self._bind(node.where, params, idx) if node.where else None,
+                [self._bind(e, params, idx) for e in node.group_by],
+                self._bind(node.having, params, idx) if node.having else None,
+                [(self._bind(e, params, idx), d) for e, d in node.order_by],
+                node.limit, node.offset, node.distinct)
+        if isinstance(node, ast.Insert):
+            return ast.Insert(node.table, node.columns,
+                              [[self._bind(e, params, idx) for e in row]
+                               for row in node.rows])
+        if isinstance(node, ast.Update):
+            return ast.Update(node.table,
+                              [(col, self._bind(expr, params, idx))
+                               for col, expr in node.assignments],
+                              self._bind(node.where, params, idx) if node.where else None)
+        if isinstance(node, ast.Delete):
+            return ast.Delete(node.table,
+                              self._bind(node.where, params, idx) if node.where else None)
+        if isinstance(node, ast.Explain):
+            return ast.Explain(self._bind(node.stmt, params, idx))
+        # CreateTable, DropTable, Begin, Commit, Rollback carry no expressions
+        return node
 
 def _arith(op):
     def fn(a, b):

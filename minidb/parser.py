@@ -29,6 +29,7 @@ class Parser:
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.i = 0
+        self.param_counter = 0
 
     # ---------------- token helpers ---------------- #
 
@@ -422,6 +423,11 @@ class Parser:
         if self.at_keyword("null"):
             self.advance()
             return ast.Literal(None)
+        if self.at_punct("?"):
+            self.advance()
+            ph = ast.ParamPlaceholder(self.param_counter)
+            self.param_counter += 1
+            return ph
         if self.at_punct("("):
             self.advance()
             expr = self._parse_expr()
