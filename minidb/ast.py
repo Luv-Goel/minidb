@@ -80,6 +80,7 @@ class Between(Expr):
 class FuncCall(Expr):
     name: str                       # count, sum, avg, min, max, length, ...
     args: list[Expr]
+    distinct: bool = False          # COUNT(DISTINCT x) / etc.
 
 
 AGGREGATES = {"count", "sum", "avg", "min", "max"}

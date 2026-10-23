@@ -403,13 +403,19 @@ class Database:
 
         # 6. DISTINCT
         if stmt.distinct:
-            seen = set()
-            unique = []
-            for r in rows:
+            # A `DISTINCT` set collapses rows, so `groups` must shrink in
+            # lockstep or ORDER BY (step 7) pairs surviving rows with the
+            # wrong group env and silently sorts by garbage keys.
+            seen: set[tuple] = set()
+            unique_rows: list[tuple] = []
+            unique_groups: list[tuple[dict, list[dict]]] = []
+            for r, grp in zip(rows, groups):
                 if r not in seen:
                     seen.add(r)
-                    unique.append(r)
-            rows = unique
+                    unique_rows.append(r)
+                    unique_groups.append(grp)
+            rows = unique_rows
+            groups = unique_groups
 
         # 7. ORDER BY — evaluated against the group envs / output hybrids
         if stmt.order_by:
@@ -480,12 +486,32 @@ class Database:
             if not args or (isinstance(args[0], ast.Column)
                             and args[0].name == "*"):
                 return len(members)
-            return sum(1 for m in members
-                       if self._eval(args[0], m, {}) is not None)
+            values = [self._eval(args[0], m, {}) for m in members]
+            if fn.distinct:
+                values = [v for v in set(
+                    values) if v is not None]
+                return len(values)
+            return sum(1 for v in values if v is not None)
         values = [self._eval(args[0], m, {}) for m in members]
         values = [v for v in values if v is not None]
+        if fn.distinct:
+            # DISTINCT over aggregates: collapse duplicates, keep first-seen
+            # order so results stay deterministic across runs.
+            seen_v: list = []
+            for v in values:
+                if v not in seen_v:
+                    seen_v.append(v)
+            values = seen_v
         if not values:
             return None
+        if name in ("sum", "avg"):
+            # TEXT columns silently produce a raw TypeError otherwise;
+            # fail with the engine's own error type instead.
+            for v in values:
+                if isinstance(v, bool) or not isinstance(v, (int, float)):
+                    raise ExecutionError(
+                        f"{name.upper()}() requires numeric values, got "
+                        f"{v!r}")
         if name == "sum":
             return sum(values)
         if name == "avg":
@@ -581,7 +607,11 @@ def _arith(op):
     def fn(a, b):
         if a is None or b is None:
             return None
-        return op(a, b)
+        try:
+            return op(a, b)
+        except ZeroDivisionError:
+            # SQL returns NULL rather than raising on /0 or %0
+            return None
     return fn
 
 

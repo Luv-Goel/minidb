@@ -432,8 +432,16 @@ class Parser:
             if self.at_punct("("):           # function call
                 self.advance()
                 args: list[ast.Expr] = []
+                distinct = False
+                if self.at_keyword("distinct"):
+                    self.advance()
+                    distinct = True
                 if not self.at_punct(")"):
                     if self.at_op("*"):
+                        if distinct:
+                            raise ParseError(
+                                "COUNT(DISTINCT *) is not supported",
+                                self.peek().pos)
                         self.advance()
                         args.append(ast.Column("*"))
                     else:
@@ -442,7 +450,7 @@ class Parser:
                         self.advance()
                         args.append(self._parse_expr())
                 self.expect_punct(")")
-                return ast.FuncCall(name, args)
+                return ast.FuncCall(name, args, distinct)
             if self.at_punct("."):           # qualified column t.col
                 self.advance()
                 col = self.advance()
